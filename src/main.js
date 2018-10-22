@@ -29,14 +29,14 @@ function resize() {
 
 window.onload = function() {
   game = new Phaser.Game({
-    type: Phaser.AUTO,
+    type: Phaser.canvas,
     canvas: document.getElementById('game'),
     width: config.GAME_WIDTH,
     height: config.GAME_HEIGHT,
     physics: {
       default: 'arcade',
       arcade: {
-          debug: true
+          debug: false
       }
     },
     scene: [

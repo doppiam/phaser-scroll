@@ -9,12 +9,22 @@ constructor(test) {
 preload() {
   //Load assets
   this.load.image('logo', 'assets/images/logo.png');
-  this.load.image('sky', 'assets/images/sky.png');
+  this.load.image('sky', 'assets/images/bg/plx-1.png');
+  this.load.image('forest1', 'assets/images/bg/plx-2.png');
+  this.load.image('forest2', 'assets/images/bg/plx-3.png');
+  this.load.image('forest3', 'assets/images/bg/plx-4.png');
+  this.load.image('forest4', 'assets/images/bg/plx-5.png');
 
   //Load sprites
-  this.load.spritesheet('ship', 
-    'assets/images/ship.png',
-    { frameWidth: 64, frameHeight: 96 }
+  // player
+  this.load.spritesheet('monster', 
+    'assets/images/monster.png',
+    { frameWidth: 197, frameHeight: 164 }
+  );
+  // ghost
+  this.load.spritesheet('ghost', 
+    'assets/images/ghost/ghost-idle.png',
+    { frameWidth: 123, frameHeight: 96 }
   );
 
   //Display loading progress
