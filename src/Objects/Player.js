@@ -1,4 +1,4 @@
-export default class Monster extends Phaser.Physics.Arcade.Sprite  {
+export default class Player extends Phaser.Physics.Arcade.Sprite  {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
         scene.physics.world.enable(this);

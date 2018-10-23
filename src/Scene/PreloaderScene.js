@@ -17,14 +17,22 @@ preload() {
 
   //Load sprites
   // player
-  this.load.spritesheet('monster', 
-    'assets/images/monster.png',
-    { frameWidth: 197, frameHeight: 164 }
+  // this.load.spritesheet('monster', 
+  //   'assets/images/monster.png',
+  //   { frameWidth: 197, frameHeight: 164 }
+  // );
+  this.load.spritesheet('crow', 
+    'assets/images/crow/crow.png',
+    { frameWidth: 100, frameHeight: 100 }
   );
   // ghost
   this.load.spritesheet('ghost', 
     'assets/images/ghost/ghost-idle.png',
-    { frameWidth: 123, frameHeight: 96 }
+    { frameWidth: 90, frameHeight: 70 }
+  );
+  this.load.spritesheet('ghostDeath', 
+    'assets/images/ghost/ghost-death.png',
+    { frameWidth: 90, frameHeight: 70 }
   );
 
   //Display loading progress
