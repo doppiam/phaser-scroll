@@ -11,9 +11,7 @@ var forest2;
 var forest3;
 var forest4;
 var player;
-var ghost1;
-var ghost2;
-var ghost3;
+var ghosts;
 var playerGhostOverlap;
 
 export default class GameScene extends Phaser.Scene {
@@ -34,18 +32,6 @@ export default class GameScene extends Phaser.Scene {
         
         // player
         player = new Player(this, 250, this.sys.game.config.height / 2, 'crow');
-        // this.anims.create({
-        //     key: 'up',
-        //     frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
-        //     frameRate: 10,
-        //     repeat: 0
-        // });
-        // this.anims.create({
-        //     key: 'down',
-        //     frames: this.anims.generateFrameNumbers('player', { start: 4, end: 5 }),
-        //     frameRate: 10,
-        //     repeat: 0
-        // });
         this.anims.create({
             key: 'move',
             frames: this.anims.generateFrameNumbers('crow', { start: 0, end: 5 }),
@@ -61,13 +47,20 @@ export default class GameScene extends Phaser.Scene {
             frameRate: 10,
             repeat: 0
         });
-        ghost1 = spawnGhosts(this, ghost1);
-        ghost2 = spawnGhosts(this, ghost2);
-        ghost3 = spawnGhosts(this, ghost3);
+        this.anims.create({
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('ghost', { start: 0, end: 6 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        ghosts = spawnGhosts(this, 3);
+        // ghost2 = spawnGhosts(this, ghost2);
+        // ghost3 = spawnGhosts(this, ghost3);
 
         
         // cursors
-        this.cursors = this.input.keyboard.createCursorKeys();
+        // this.cursors = this.input.keyboard.createCursorKeys();
         this.pointer = this.input.activePointer;
 
         // collisions
@@ -80,8 +73,8 @@ export default class GameScene extends Phaser.Scene {
         scroll(forest3, this.sys.game, config.scrollVelocity3);
         scroll(forest4, this.sys.game, config.scrollVelocity4);
 
-        moveGhosts(this, [ghost1, ghost2, ghost3]);
-        checkGhost();
+        moveGhosts(this, ghosts);
+        checkGhost(this, ghosts);
         
         this.input.on('pointerdown', function(pointer){
             player.setVelocityY(-config.playerVelocity);
@@ -121,21 +114,31 @@ function doubleBg(scene, varName, bg, repeat) {
 }
 
 // spawn a ghosts
-function spawnGhosts(scene, ghostName) {
-    scene.anims.create({
-        key: 'idle',
-        frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 6 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    ghostName = new Ghost(scene, scene.sys.game.config.width + Math.floor((Math.random() * 250) + 10), Math.floor((Math.random() * 680) + 60), 'ghost');
-    ghostName.setScale(1.9);
-    ghostName.anims.play('idle');
-    ghostName.setVelocityX(-config.ghostVelocity);
-    // scene.physics.add.collider(player, ghostName);
-    scene.physics.add.overlap(player, ghostName, hitGhost, null, scene);
+function spawnGhosts(scene, repeat) {
 
-    return ghostName;
+    ghosts = scene.physics.add.group({
+            key: 'ghost',
+            repeat: repeat,
+            enable: true,
+            setCollideWorldBounds: false,
+            setVelocityX: -config.ghostVelocity,
+            setXY: {
+                x: scene.sys.game.config.width,
+                y: scene.sys.game.config.height,
+                stepX: -Math.floor((Math.random() * 200) + 80),
+                stepY: -Math.floor((Math.random() * 200) + 80),
+            }
+        }
+    );
+
+    ghosts.children.iterate(function (child) {
+        child.anims.play('idle');
+        scene.physics.add.overlap(player, child, hitGhost, false, scene);
+    });
+
+    // playerGhostOverlap = scene.physics.add.overlap(player, ghosts, hitGhost, null, scene);
+
+    return ghosts;
 }
 
 // move ghosts, when exit from the screen reset position
@@ -143,25 +146,40 @@ function moveGhosts(scene, ghostNames) {
     var end = -100;
     var start = scene.sys.game.config.width + Math.floor((Math.random() * 250) + 10);
 
-    ghostNames.forEach(ghost => {
-        if(ghost.x >= end) {
-            ghost.setVelocityX(-config.ghostVelocity);
+    ghostNames.children.iterate(function (child) {
+        if(child.x >= end) {
+            child.setVelocityX(-config.ghostVelocity + Phaser.Math.FloatBetween(0.1, 0.3));
         } else {
-            ghost.x = start;
+            child.x = start;
         }
     });
+
+    // ghostNames.forEach(ghost => {
+    //     if(ghost.x >= end) {
+    //         ghost.setVelocityX(-config.ghostVelocity);
+    //     } else {
+    //         ghost.x = start;
+    //     }
+    // });
 }
 
-function checkGhost() {
-    
+function checkGhost(scene, ghostNames) {
 }
 
-function hitGhost(player, ghostName) {
-    //this.scene.scene.physics.world.removeCollider(playerGhostOverlap);
-    ghostName.anims.play('death');
-    ghostName.on('animationcomplete', function(currentAnim, currentFrame){
-        ghostName.disableBody(true, true);
+function hitGhost(player, singleGhost) {
+    player.setTint(0xff0000);
+    singleGhost.anims.play('death');
+    singleGhost.on('animationcomplete', function(currentAnim, currentFrame){
+        if (currentAnim.key == 'death' && currentFrame.index == 6) {
+            singleGhost.disableBody(true, true);
+            player.clearTint();
+        }
     });
     
     life -= 1;
+
+    if (ghosts.countActive() <= 2) {
+        ghosts.killAndHide();
+        ghosts = spawnGhosts(this, 3);
+    }
 }
